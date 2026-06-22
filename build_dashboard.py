@@ -19,7 +19,7 @@ HTML = r"""<!DOCTYPE html>
 :root{
   --bg:#FBFAF7; --surface:#FFFFFF; --ink:#1F1E1C; --muted:#5F5E5A; --faint:#8A8983;
   --line:rgba(31,30,28,.12); --line2:rgba(31,30,28,.22);
-  --crisis:#A32D2D; --warn:#BA7517; --mid:#185FA5; --good:#0F6E56;
+  --crisis:#C0392B; --warn:#B9770E; --mid:#3A7CA5; --good:#1F5C8B;
   --r:10px;
 }
 *{box-sizing:border-box}
@@ -126,7 +126,7 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
 
 <header class="hero">
   <div class="wrap">
-    <div class="kicker">台中市衛生局決策視覺化 · HAAI 醫療可及性缺口指數</div>
+    <div class="kicker">台中市衛生局決策視覺化 · HAAI 醫療可及性指數</div>
     <h1>醫療繁榮的假象</h1>
     <p class="sub">台中市醫療量能名列全台前三，但把 29 個行政區的「資源供給」攤開對上「老化需求」與「就醫距離」，最需要醫療的人，反而最難就醫。</p>
     <div class="kpis">
@@ -149,36 +149,41 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
 <section>
   <div class="wrap reveal">
     <div class="eyebrow">C Complication · Q Question</div>
-    <div class="h-step"><b>識</b><h2>揭穿假象：HAAI 缺口指數</h2></div>
-    <p class="lede">HAAI 把每一區的「供給力」除以「需求壓力與就醫距離」，量化各區的醫療可及性。分數越低，代表越是「需求高、可及性低」的高風險區。</p>
+    <div class="h-step"><b>識</b><h2>揭穿假象：醫療可及性指數</h2></div>
+    <p class="lede">可及性指數（0–100，分數越高代表可及性越佳；缺口 = 100 − 指數）將各區「供給力 × 距離可及性」除以「高齡需求壓力」。分數越低、缺口越大，越是「需求高、可及性低」的高風險區。</p>
     <div class="formula">
-      HAAI（費米式）=（每萬人病床數 × 醫師密度係數）÷（老年人口比率 × 就醫距離衰減因子）
-      <div class="v3">下方圖表採 V3 正規化版（0–100，偏態 1.36→0.13 修正後），將供給、需求、可及三因子標準化，避免小人口區的人均值灌爆排名。</div>
+      可及性指數 = 100 ×（供給力 × 距離可及性 ÷ 高齡需求壓力）÷ 全市最高原始值
+      <div class="v3">供給力 = 0.6×病床標準分 + 0.4×醫師標準分（取 ln 壓偏態）；需求壓力 = 老年率 ÷ 全市最高；距離可及性 = 距最近區域級以上醫院之衰減係數。三因子標準化後合成，偏態 1.36→0.13。</div>
     </div>
 
     <div class="legend">
-      <span><i style="background:var(--crisis)"></i>跨區依賴 · 無在地急診床</span>
-      <span><i style="background:var(--warn)"></i>高齡高 · HAAI 低</span>
-      <span><i style="background:var(--mid)"></i>高齡高 · HAAI 中高</span>
-      <span><i style="background:var(--good)"></i>相對平衡</span>
+      <span><i style="background:#D73027"></i>跨區依賴 · 無在地急診床</span>
+      <span><i style="background:#FDAE61"></i>高齡高 · 指數低</span>
+      <span><i style="background:#74ADD1"></i>高齡高 · 指數中高</span>
+      <span><i style="background:#4575B4"></i>相對平衡</span>
     </div>
 
     <figure>
-      <img src="assets/01_choropleth.png" alt="台中市各區 HAAI 旗標分色熱力圖">
-      <figcaption>空間分布：紅色「醫療沙漠」集中於山線與海線外圍，綠色「相對平衡」集中於市中心與屯區。</figcaption>
+      <img src="assets/choropleth_continuous.png" alt="台中市醫療可及性連續色階熱力圖">
+      <figcaption>空間分布（連續色階 · 色覺友善 cividis）：色越深可及性越低，和平與山線最深，海線梧棲、沙鹿最亮。</figcaption>
     </figure>
 
     <figure>
-      <img src="assets/02_dual_axis_v3.png" alt="高齡率與 HAAI V3 分數雙軸長條圖，依高齡率排序">
-      <figcaption>長條＝高齡率（依高齡率由高到低排序），折線＝HAAI V3 分數。左側高齡最重的東勢、石岡、新社、和平，HAAI 反而墊底，落差就是洞察核心。</figcaption>
+      <img src="assets/scatter_quadrant.png" alt="高齡率與可及性指數四象限散點圖">
+      <figcaption>高齡率 × 可及性指數：右下象限（高齡高、可及性低）為高風險區，和平、東勢、新社、石岡落於此。各區為離散點、不以折線連接，避免製造假連續趨勢。</figcaption>
+    </figure>
+
+    <figure>
+      <img src="assets/pressure_bar.png" alt="各區每床急診壓力與承載假設">
+      <figcaption>每床急診壓力（推估）vs 承載假設：北屯每床逾千人次，遠超 ×50／×100／×150 任一吞吐假設，缺口與係數無關。</figcaption>
     </figure>
 
     <div class="grid2">
       <div>
-        <h3 style="font-size:16px;margin-bottom:6px">各區 HAAI V3 排名（點任一列看診斷）</h3>
+        <h3 style="font-size:16px;margin-bottom:6px">各區可及性指數排名（點任一列看診斷）</h3>
         <table>
           <thead><tr>
-            <th class="r">#</th><th>行政區</th><th class="r">V3</th>
+            <th class="r">#</th><th>行政區</th><th class="r">指數</th>
             <th>因子分解 供給/需求/可及</th><th class="r">高齡率</th><th class="r">距大醫院</th>
           </tr></thead>
           <tbody id="tbl"></tbody>
@@ -211,7 +216,7 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
         <div class="tag">★ 最高效益</div>
         <h3>情境 A · 於東勢設立區域醫院 1 家</h3>
         <p>補上山線四區最大的供給缺口。</p>
-        <div class="eff">HAAI 指數提升約 42%，覆蓋人口約 3.8 萬人</div>
+        <div class="eff">可及性指數提升約 42%、覆蓋約 3.8 萬人（規劃書政策模擬值）</div>
       </div>
       <div class="card">
         <div class="tag s2">短期應急</div>
@@ -232,6 +237,7 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
       <li>急診原始資料僅為全市/縣市層級；分區急診需求係以費米加權（高齡權重 ×3）推估分配，非各區實測值。</li>
       <li>急診資料年（2024）與人口資料年（2026）不一致，趨勢推估固定總人口、僅讓高齡結構演進。</li>
       <li>就醫距離採行政區中心點直線距離代理，非 Google Maps 行車距離（無 API key）。</li>
+      <li>以一般病床數推導急診承載量為不同概念之近似，僅作各區相對壓力排序，非絕對超載門檻。</li>
       <li>清水、石岡標示為「跨區依賴」係因其院所為精神/慢性療養醫院，一般急性病床為 0，非全無醫療設施。</li>
       <li>跨區就醫流向為結構估算，非健保實際就醫移動紀錄。</li>
     </ul>
@@ -240,7 +246,7 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
 
 <script>
 const DATA = __DATA__;
-const PAL = {crisis:'#A32D2D',warn:'#BA7517',mid:'#185FA5',good:'#0F6E56'};
+const PAL = {crisis:'#C0392B',warn:'#B9770E',mid:'#3A7CA5',good:'#1F5C8B'};
 const tbody = document.getElementById('tbl');
 const panel = document.getElementById('panel');
 
@@ -278,10 +284,10 @@ function select(d){
   const crisis = r.flag.includes('跨區')||r.flag.includes('無在地');
   const capColor = crisis?PAL.crisis:(r.flag.includes('低')?PAL.warn:(r.flag.includes('中高')?PAL.mid:PAL.good));
   panel.innerHTML = `
-    <div class="pd"><h3>${r.district}</h3><span class="rk">HAAI 第 ${r.rank} / 29 名</span></div>
+    <div class="pd"><h3>${r.district}</h3><span class="rk">可及性指數 第 ${r.rank} / 29 名</span></div>
     <span class="cap" style="background:${capColor}1A;color:${capColor}">${r.capacity||r.flag}</span>
     <div class="big">
-      <div>V3 分數<b style="color:${PAL.mid}">${r.v3.toFixed(1)}</b></div>
+      <div>可及性指數<b style="color:${PAL.mid}">${r.v3.toFixed(1)}</b></div>
       <div>高齡率<b>${r.elderly.toFixed(1)}%</b></div>
       <div>距大醫院<b>${r.km===0?'就近':r.km.toFixed(1)+'km'}</b></div>
     </div>
