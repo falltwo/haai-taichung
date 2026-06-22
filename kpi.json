@@ -1,0 +1,11 @@
+{
+ "total_beds": 10541,
+ "oldest": {
+  "d": "東勢區",
+  "el": 25.9
+ },
+ "beitun_pressure": 1067,
+ "beitun_beds": 159,
+ "heping_km": 39.4,
+ "no_local_count": 10
+}
