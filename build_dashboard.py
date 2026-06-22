@@ -5,7 +5,8 @@ ponytail: one hand-written HTML file, no framework, no build step."""
 import json
 from pathlib import Path
 
-DASH = Path(r"C:\Vision\outputs\dashboard")
+BASE = Path(__file__).resolve().parents[2]
+DASH = BASE / "outputs" / "dashboard"
 DATA = json.loads((DASH / "diagnosis_data.json").read_text(encoding="utf-8"))
 KPI = json.loads((DASH / "kpi.json").read_text(encoding="utf-8"))
 
@@ -128,12 +129,12 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
   <div class="wrap">
     <div class="kicker">台中市衛生局決策視覺化 · HAAI 醫療可及性指數</div>
     <h1>醫療繁榮的假象</h1>
-    <p class="sub">台中市醫療量能名列全台前三，但把 29 個行政區的「資源供給」攤開對上「老化需求」與「就醫距離」，最需要醫療的人，反而最難就醫。</p>
+    <p class="sub">台中市醫療總量可觀，但把 29 個行政區的「資源供給」攤開對上「老化需求」與「就醫距離」，就會看到總量平均掩蓋的空間錯配。</p>
     <div class="kpis">
-      <div class="kpi k-good"><div class="lab">全市開放病床</div><div class="val num">__BEDS__<small>床</small></div><div class="meta">醫療量能名列全台前三</div></div>
+      <div class="kpi k-good"><div class="lab">全市許可一般病床</div><div class="val num">__LICENSED_BEDS__<small>床</small></div><div class="meta">開放 __OPEN_BEDS__ 床 · __OPEN_PER10K__/萬人</div></div>
       <div class="kpi k-warn"><div class="lab">最高齡行政區</div><div class="val">__OLD_D__ <small class="num">__OLD_E__%</small></div><div class="meta">已超過超高齡社會 20% 門檻</div></div>
-      <div class="kpi k-crisis"><div class="lab">北屯區每床急診壓力</div><div class="val num">__BEITUN__<small>人次/床</small></div><div class="meta">僅 __BEITUN_B__ 床 · 結構性資源錯配</div></div>
-      <div class="kpi k-crisis"><div class="lab">和平區距最近醫學中心</div><div class="val num">__HEPING__<small>公里</small></div><div class="meta">__NOLOCAL__ 區無在地急診資源</div></div>
+      <div class="kpi k-crisis"><div class="lab">北屯區混合壓力（推估）</div><div class="val num">__BEITUN__<small>人次/床</small></div><div class="meta">__BEITUN_B__ 床為官方值 · 分區需求為費米估算</div></div>
+      <div class="kpi k-crisis"><div class="lab">和平區跨區代理距離</div><div class="val num">__HEPING__<small>公里</small></div><div class="meta">__NOLOCAL__ 區無開放一般病床</div></div>
     </div>
   </div>
 </header>
@@ -142,7 +143,7 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
   <div class="wrap reveal">
     <div class="eyebrow">S Situation</div>
     <div class="h-step"><b>見</b><h2>先看見繁榮</h2></div>
-    <p class="lede">台中市擁有中國醫大附醫、中山醫大附醫、台中榮總三大醫學中心，醫療院所超過 3,600 家，全市平均每萬人病床數約 58 床、高於全台平均。單看總量，這是一座醫療資源充裕的城市。問題不在總量，在於它落在哪裡。</p>
+    <p class="lede">資料表列 66 家醫院、4 家具醫學中心資格的院所（分布於 3 個行政區）、11,153 床許可一般病床與 7,555 名西醫師。模型採用的是 10,541 床開放一般病床（每萬人 36.8 床）。問題不在總量，而在資源是否落在需求與距離壓力最高的地方。</p>
   </div>
 </section>
 
@@ -153,19 +154,25 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
     <p class="lede">可及性指數（0–100，分數越高代表可及性越佳；缺口 = 100 − 指數）將各區「供給力 × 距離可及性」除以「高齡需求壓力」。分數越低、缺口越大，越是「需求高、可及性低」的高風險區。</p>
     <div class="formula">
       可及性指數 = 100 ×（供給力 × 距離可及性 ÷ 高齡需求壓力）÷ 全市最高原始值
-      <div class="v3">供給力 = 0.6×病床標準分 + 0.4×醫師標準分（取 ln 壓偏態）；需求壓力 = 老年率 ÷ 全市最高；距離可及性 = 距最近區域級以上醫院之衰減係數。三因子標準化後合成，偏態 1.36→0.13。</div>
+      <div class="v3">距離可及性 = max(0.10, 1 − 0.15×距離/10)。無床區先以「最近核心區床密度×距離可及性」作有效床密度，再取 ln 標準化；供給力 = 0.6×病床標準分 + 0.4×醫師標準分；需求壓力 = 老年率÷全市最高。9 組合理權重/衰減情境的最低排名相關 ρ = 0.987。</div>
     </div>
 
     <div class="legend">
-      <span><i style="background:#D73027"></i>跨區依賴 · 無在地急診床</span>
-      <span><i style="background:#FDAE61"></i>高齡高 · 指數低</span>
-      <span><i style="background:#74ADD1"></i>高齡高 · 指數中高</span>
-      <span><i style="background:#4575B4"></i>相對平衡</span>
+      <span><i style="background:#CC6677"></i>無在地一般病床 · 跨區依賴</span>
+      <span><i style="background:#EE7733"></i>高齡高 · 可及性低</span>
+      <span><i style="background:#4477AA"></i>高齡高 · 可及性中高</span>
+      <span><i style="background:#AA4499"></i>需求較低 · 可及性仍低</span>
+      <span><i style="background:#228833"></i>相對平衡</span>
     </div>
 
     <figure>
       <img src="assets/choropleth_continuous.png" alt="台中市醫療可及性連續色階熱力圖">
       <figcaption>空間分布（連續色階 · 色覺友善 cividis）：色越深可及性越低，和平與山線最深，海線梧棲、沙鹿最亮。</figcaption>
+    </figure>
+
+    <figure>
+      <img src="assets/observed_conflict.png" alt="醫療供給與高齡需求的獨立行政資料檢驗">
+      <figcaption>猜想 vs 行政資料：病床密度沒有隨高齡率增加（r=-0.09, p=.633）；高齡率越高的區，代理距離反而越遠（r=+.41, p=.027）。相關不等於因果。</figcaption>
     </figure>
 
     <figure>
@@ -175,7 +182,7 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
 
     <figure>
       <img src="assets/pressure_bar.png" alt="各區每床急診壓力與承載假設">
-      <figcaption>每床急診壓力（推估）vs 承載假設：北屯每床逾千人次，遠超 ×50／×100／×150 任一吞吐假設，缺口與係數無關。</figcaption>
+      <figcaption>急診壓力分開解讀：有床區呈現「官方一般床位＋推估需求」的混合壓力；零床區呈現跨區代理距離。一般病床不是急診實際承載量。</figcaption>
     </figure>
 
     <div class="grid2">
@@ -200,7 +207,7 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
   <div class="wrap reveal">
     <div class="eyebrow">資源錯置的證據</div>
     <div class="h-step"><b>謀</b><h2>跨區就醫流向</h2></div>
-    <p class="lede">10 個無在地急診資源的行政區，居民必須跨區就醫。桑基圖呈現各區「往哪裡流」與流量規模，紅色越粗代表越多急診需求被推往鄰近核心區。</p>
+    <p class="lede">10 個行政區在資料中無開放一般病床。下列流向依最近區域級以上醫院所在區推估，用來提出待驗證的後送假說，不代表居民實際移動。</p>
     <iframe class="sankey" src="assets/sankey.html" title="跨區就醫流向桑基圖" loading="lazy"></iframe>
     <figcaption style="font-size:12px;color:var(--faint);margin-top:9px">流向依「最近區域級以上醫院」估算，為結構推估，非健保實際就醫移動紀錄。</figcaption>
   </div>
@@ -210,19 +217,19 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
   <div class="wrap reveal">
     <div class="eyebrow">A Answer</div>
     <div class="h-step"><b>斷</b><h2>該誰做、何時介入</h2></div>
-    <p class="lede">點擊上方任一行政區，即時輸出該區的現況診斷、介入建議與驗證指標。以下為兩個全市層級的優先情境（規劃書推估值）。</p>
+    <p class="lede">點擊上方任一行政區，可查看證據等級、現況診斷與應蒐集的真實成效指標。長期設施評估與短期服務補位應平行推進，不用模型分數取代居民結果。</p>
     <div class="scn">
       <div class="card star">
-        <div class="tag">★ 最高效益</div>
-        <h3>情境 A · 於東勢設立區域醫院 1 家</h3>
-        <p>補上山線四區最大的供給缺口。</p>
-        <div class="eff">可及性指數提升約 42%、覆蓋約 3.8 萬人（規劃書政策模擬值）</div>
+        <div class="tag">長期決策門檻</div>
+        <h3>情境 A · 山線急重症固定據點可行性評估</h3>
+        <p>衛生局主責，會同區域醫療網、消防局與潛在營運院方；6 個月完成需求、選址、人力與財務評估。</p>
+        <div class="eff">以 119 實際到院時間、跨區轉送率與急重症病例量決定是否進入建置，不預設一定蓋醫院。</div>
       </div>
       <div class="card">
-        <div class="tag s2">短期應急</div>
-        <h3>情境 B · 增加山線巡迴醫療班次</h3>
-        <p>不需建院，先改善就醫距離衰減。</p>
-        <div class="eff">距離衰減因子改善約 20%，成本僅情境 A 的 1/10</div>
+        <div class="tag s2">立即平行啟動</div>
+        <h3>情境 B · 山線巡迴與遠距轉診試辦</h3>
+        <p>衛生局與在地衛生所/醫院於 3 個月內上路，先建立基線再追蹤 6 個月。</p>
+        <div class="eff">KPI：服務覆蓋率、實際使用率、轉診完成率、到院時間與非計畫急診；未達標則增班或設固定據點。</div>
       </div>
     </div>
   </div>
@@ -231,13 +238,13 @@ footer .src{font-size:12px;color:var(--faint);margin-top:14px}
 <footer>
   <div class="wrap reveal">
     <h3>資料來源</h3>
-    <p class="src">台中市 Open Data 醫院基本資料、衛福部醫院一般病床數、台中市民政局人口結構、衛福部醫療機構人員統計、衛福部縣市別急診就醫概況、g0v/twgeojson 行政區界線。HAAI 建模與分區急診推估由本組計算。</p>
+    <p class="src">主要本地檔案：臺中市115年5月人口結構、臺中市醫院一般病床數、64家醫院分級名冊（115-01-07）、臺中地區113年醫療職位統計、113年縣市別急診就醫概況、g0v/twgeojson 行政區界線。完整檔名、年度、欄位與方法限制收錄於書面報告。</p>
     <h3 style="margin-top:22px">誠實註記（方法論限制）</h3>
     <ul>
       <li>急診原始資料僅為全市/縣市層級；分區急診需求係以費米加權（高齡權重 ×3）推估分配，非各區實測值。</li>
       <li>急診資料年（2024）與人口資料年（2026）不一致，趨勢推估固定總人口、僅讓高齡結構演進。</li>
       <li>就醫距離採行政區中心點直線距離代理，非 Google Maps 行車距離（無 API key）。</li>
-      <li>以一般病床數推導急診承載量為不同概念之近似，僅作各區相對壓力排序，非絕對超載門檻。</li>
+      <li>以開放一般病床數對照推估急診需求，是混合壓力指標；一般病床不等於急診檢傷、留觀或人力承載。</li>
       <li>清水、石岡標示為「跨區依賴」係因其院所為精神/慢性療養醫院，一般急性病床為 0，非全無醫療設施。</li>
       <li>跨區就醫流向為結構估算，非健保實際就醫移動紀錄。</li>
     </ul>
@@ -281,15 +288,15 @@ function facBar(label,v){
 function select(d){
   const r = DATA.find(x=>x.district===d);
   document.querySelectorAll('#tbl tr').forEach(t=>t.classList.toggle('on',t.dataset.d===d));
-  const crisis = r.flag.includes('跨區')||r.flag.includes('無在地');
-  const capColor = crisis?PAL.crisis:(r.flag.includes('低')?PAL.warn:(r.flag.includes('中高')?PAL.mid:PAL.good));
+  const capColor = r.flag_color;
   panel.innerHTML = `
     <div class="pd"><h3>${r.district}</h3><span class="rk">可及性指數 第 ${r.rank} / 29 名</span></div>
-    <span class="cap" style="background:${capColor}1A;color:${capColor}">${r.capacity||r.flag}</span>
+    <span class="cap" style="background:${capColor}1A;color:${capColor}">${r.flag}</span>
+    <div style="font-size:11.5px;color:var(--faint);margin-top:8px">證據等級：${r.evidence_tier}</div>
     <div class="big">
       <div>可及性指數<b style="color:${PAL.mid}">${r.v3.toFixed(1)}</b></div>
       <div>高齡率<b>${r.elderly.toFixed(1)}%</b></div>
-      <div>距大醫院<b>${r.km===0?'就近':r.km.toFixed(1)+'km'}</b></div>
+      <div>代理距離<b>${r.km===0?'同區':r.km.toFixed(1)+'km'}</b></div>
     </div>
     <div class="facs">
       ${facBar('供給',r.sup)}${facBar('需求',r.dem)}${facBar('可及',r.acc)}
@@ -311,14 +318,17 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 repl = {
     "__DATA__": json.dumps(DATA, ensure_ascii=False),
-    "__BEDS__": f"{KPI['total_beds']:,}",
-    "__OLD_D__": KPI["oldest"]["d"], "__OLD_E__": f"{KPI['oldest']['el']:.1f}",
-    "__BEITUN__": f"{KPI['beitun_pressure']:,}", "__BEITUN_B__": f"{KPI['beitun_beds']}",
-    "__HEPING__": f"{KPI['heping_km']:.1f}", "__NOLOCAL__": str(KPI["no_local_count"]),
+    "__LICENSED_BEDS__": f"{KPI['licensed_general_beds']:,}",
+    "__OPEN_BEDS__": f"{KPI['open_general_beds']:,}",
+    "__OPEN_PER10K__": f"{KPI['open_beds_per_10k']:.1f}",
+    "__OLD_D__": KPI["oldest"]["district"], "__OLD_E__": f"{KPI['oldest']['elderly_rate_pct']:.1f}",
+    "__BEITUN__": f"{KPI['beitun']['estimated_pressure']:,.0f}", "__BEITUN_B__": f"{KPI['beitun']['open_general_beds']}",
+    "__HEPING__": f"{KPI['heping_proxy_distance_km']:.1f}", "__NOLOCAL__": str(KPI["zero_open_general_bed_districts"]),
 }
 for k, v in repl.items():
     HTML = HTML.replace(k, v)
 
-(DASH / "dashboard.html").write_text(HTML, encoding="utf-8")
-print("wrote dashboard.html", len(HTML), "bytes")
+for filename in ("dashboard.html", "index.html"):
+    (DASH / filename).write_text(HTML, encoding="utf-8")
+print("wrote dashboard.html + index.html", len(HTML), "bytes each")
 print("inlined", len(DATA), "districts")

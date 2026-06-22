@@ -1,11 +1,23 @@
 {
- "total_beds": 10541,
- "oldest": {
-  "d": "東勢區",
-  "el": 25.9
- },
- "beitun_pressure": 1067,
- "beitun_beds": 159,
- "heping_km": 39.4,
- "no_local_count": 10
+  "licensed_general_beds": 11153,
+  "open_general_beds": 10541,
+  "licensed_beds_per_10k": 38.89100823709671,
+  "open_beds_per_10k": 36.75693695214171,
+  "hospital_count": 66,
+  "medical_center_qualified_hospitals": 4,
+  "medical_center_districts": 3,
+  "western_doctors": 7555,
+  "oldest": {
+    "district": "東勢區",
+    "elderly_rate_pct": 25.88159031979257
+  },
+  "beitun": {
+    "open_general_beds": 159,
+    "estimated_er_demand_2024": 169608,
+    "estimated_pressure": 1066.7169811320755
+  },
+  "heping_proxy_distance_km": 39.42,
+  "zero_open_general_bed_districts": 10,
+  "emergency_allocation_target": 1565350,
+  "emergency_allocation_sum": 1565350
 }
